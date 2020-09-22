@@ -43,7 +43,7 @@ module "shipyard_prd" {
   // required
   name           = "shure-monitoring-prd"
   image          = "docker.pkg.github.com/byuoitav/shure-monitoring-service/shure-monitoring-service-dev"
-  image_version  = "b4b80a1"
+  image_version  = "985e4ad"
   container_port = 80 // doesn't actually exist in container
   repo_url       = "https://github.com/byuoitav/shure-monitoring-service"
 
