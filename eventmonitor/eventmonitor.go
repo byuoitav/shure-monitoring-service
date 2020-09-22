@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	driver "github.com/byuoitav/shure-driver"
@@ -57,6 +58,16 @@ func (s *Service) Monitor(r shure.Receiver) error {
 }
 
 func (s *Service) processReport(r driver.Report, recv shure.Receiver) {
+
+	// Default device to reciever
+	dev := recv.Name
+
+	// Try to make the name match the Microphone if name is what we expect
+	// and the channel is not 0 (all channels) or -1 (error)
+	pieces := strings.Split(recv.Name, "-")
+	if len(pieces) >= 3 && r.Channel > 0 {
+		dev = fmt.Sprintf("%s-%s-MIC%d", pieces[0], pieces[1], r.Channel)
+	}
 	// Dispatch by type
 	switch r.Type {
 	case driver.ERROR:
@@ -65,38 +76,38 @@ func (s *Service) processReport(r driver.Report, recv shure.Receiver) {
 			s.EventEmitter.Send(shure.Event{
 				Key:    "Error",
 				Value:  fmt.Sprintf("Error from driver: %s", r.Message),
-				Device: recv.Name,
+				Device: dev,
 			})
 		}
 	case driver.BATTERY_CYCLES:
 		s.EventEmitter.Send(shure.Event{
 			Key:    "battery-cycles",
 			Value:  r.Value,
-			Device: recv.Name,
+			Device: dev,
 		})
 	case driver.BATTERY_CHARGE_MINUTES:
 		s.EventEmitter.Send(shure.Event{
 			Key:    "battery-charge-minutes",
 			Value:  r.Value,
-			Device: recv.Name,
+			Device: dev,
 		})
 	case driver.BATTERY_TYPE:
 		s.EventEmitter.Send(shure.Event{
 			Key:    "battery-type",
 			Value:  r.Value,
-			Device: recv.Name,
+			Device: dev,
 		})
 	case driver.INTERFERENCE:
 		s.EventEmitter.Send(shure.Event{
 			Key:    "interference",
 			Value:  r.Value,
-			Device: recv.Name,
+			Device: dev,
 		})
 	case driver.POWER:
 		s.EventEmitter.Send(shure.Event{
 			Key:    "power",
 			Value:  r.Value,
-			Device: recv.Name,
+			Device: dev,
 		})
 	default:
 		// skip
