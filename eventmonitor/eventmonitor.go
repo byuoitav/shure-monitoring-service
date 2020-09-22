@@ -3,6 +3,7 @@ package eventmonitor
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	driver "github.com/byuoitav/shure-driver"
@@ -44,6 +45,9 @@ func (s *Service) Monitor(r shure.Receiver) error {
 			time.Sleep(5 * time.Minute)
 			continue
 		}
+
+		// Debug purposes. Delete later
+		log.Printf("Started Reporting for %s", r.Name)
 
 		// Range over reports until the channel is closed
 		for report := range c {
