@@ -5,9 +5,9 @@ import (
 	"sync"
 
 	"github.com/byuoitav/shure-monitoring-service"
+	"github.com/byuoitav/shure-monitoring-service/avevent"
 	"github.com/byuoitav/shure-monitoring-service/couch"
 	"github.com/byuoitav/shure-monitoring-service/eventmonitor"
-	"github.com/byuoitav/shure-monitoring-service/logevent"
 	"github.com/spf13/pflag"
 )
 
@@ -36,8 +36,13 @@ func main() {
 		log.Panicf("Failed to get receivers from database: %s", err)
 	}
 
+	e, err := avevent.NewLogEmitter(eventHubAddr)
+	if err != nil {
+		log.Panicf("Failed to start log emitter")
+	}
+
 	m := eventmonitor.Service{
-		EventEmitter: &logevent.Service{},
+		EventEmitter: e,
 	}
 
 	log.Printf("Beginning monitoring...")
