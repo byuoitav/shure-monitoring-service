@@ -60,11 +60,14 @@ func (s *Service) processReport(r driver.Report, recv shure.Receiver) {
 	// Dispatch by type
 	switch r.Type {
 	case driver.ERROR:
-		s.EventEmitter.Send(shure.Event{
-			Key:    "Error",
-			Value:  fmt.Sprintf("Error from driver: %s", r.Message),
-			Device: recv.Name,
-		})
+		// Skip unknown reports
+		if r.Value != "UnknownReport" {
+			s.EventEmitter.Send(shure.Event{
+				Key:    "Error",
+				Value:  fmt.Sprintf("Error from driver: %s", r.Message),
+				Device: recv.Name,
+			})
+		}
 	case driver.BATTERY_CYCLES:
 		s.EventEmitter.Send(shure.Event{
 			Key:    "battery-cycles",
