@@ -61,7 +61,7 @@ func (s *Service) processReport(r driver.Report, recv shure.Receiver) {
 	switch r.Type {
 	case driver.ERROR:
 		// Skip unknown reports
-		if r.Value != "UnknownReport" {
+		if r.Value != "UnrecognizedReport" {
 			s.EventEmitter.Send(shure.Event{
 				Key:    "Error",
 				Value:  fmt.Sprintf("Error from driver: %s", r.Message),
