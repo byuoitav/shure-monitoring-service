@@ -5,7 +5,7 @@ go 1.15
 require (
 	github.com/byuoitav/central-event-system v0.0.0-20200121172633-64fd9d467249
 	github.com/byuoitav/common v0.0.0-20200521193927-1fdf4e0a4271
-	github.com/byuoitav/shure-driver v0.2.1
+	github.com/byuoitav/shure-driver v0.2.2
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/go-kivik/couchdb/v3 v3.2.0
 	github.com/go-kivik/kivik/v3 v3.2.0
