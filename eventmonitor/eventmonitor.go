@@ -87,10 +87,11 @@ func (s *Service) processReport(r driver.Report, recv shure.Receiver) {
 			Device: dev,
 		})
 	case _batteryCycleType:
-		value := r.Value
+		// Trim preceeding 0's
+		value := strings.TrimLeft(r.Value, "0")
 
 		// Handle special values
-		switch r.Value {
+		switch value {
 		case "65535":
 			value = "UNKNOWN"
 		case "":
@@ -103,9 +104,11 @@ func (s *Service) processReport(r driver.Report, recv shure.Receiver) {
 			Device: dev,
 		})
 	case _batteryRunTimeType:
+		// Trim preceeding 0's
+		value := strings.TrimLeft(r.Value, "0")
+
 		// Handle special values
-		value := r.Value
-		switch r.Value {
+		switch value {
 		case "65535":
 			value = "UNKNOWN"
 		case "65534":
