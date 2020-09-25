@@ -87,7 +87,7 @@ func (s *Service) processReport(r driver.Report, recv shure.Receiver) {
 			Device: dev,
 		})
 	case _batteryCycleType:
-		// Trim preceeding 0's
+		// Trim proceeding 0's
 		value := strings.TrimLeft(r.Value, "0")
 
 		// Handle special values
@@ -104,7 +104,7 @@ func (s *Service) processReport(r driver.Report, recv shure.Receiver) {
 			Device: dev,
 		})
 	case _batteryRunTimeType:
-		// Trim preceeding 0's
+		// Trim proceeding 0's
 		value := strings.TrimLeft(r.Value, "0")
 
 		// Handle special values
