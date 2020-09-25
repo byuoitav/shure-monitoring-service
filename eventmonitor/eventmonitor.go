@@ -11,6 +11,14 @@ import (
 	"github.com/byuoitav/shure-monitoring-service"
 )
 
+const (
+	_interferenceType   = "RF_INT_DET"
+	_powerType          = "TX_TYPE"
+	_batteryCycleType   = "BATT_CYCLE"
+	_batteryRunTimeType = "BATT_RUN_TIME"
+	_batteryTypeType    = "BATT_TYPE"
+)
+
 type Service struct {
 	EventEmitter shure.EventEmitter
 }
@@ -68,45 +76,77 @@ func (s *Service) processReport(r driver.Report, recv shure.Receiver) {
 	if len(pieces) >= 3 && r.Channel > 0 {
 		dev = fmt.Sprintf("%s-%s-MIC%d", pieces[0], pieces[1], r.Channel)
 	}
+
 	// Dispatch by type
 	switch r.Type {
-	case driver.ERROR:
-		// Skip unknown reports
-		if r.Value != "UnrecognizedReport" {
-			s.EventEmitter.Send(shure.Event{
-				Key:    "Error",
-				Value:  fmt.Sprintf("Error from driver: %s", r.Message),
-				Device: dev,
-			})
+	// Throw events for driver errors
+	case driver.ErrorReportType:
+		s.EventEmitter.Send(shure.Event{
+			Key:    "Error",
+			Value:  fmt.Sprintf("Error from driver: %s", r.FullReport),
+			Device: dev,
+		})
+	case _batteryCycleType:
+		value := r.Value
+
+		// Handle special values
+		switch r.Value {
+		case "65535":
+			value = "UNKNOWN"
+		case "":
+			value = "0"
 		}
-	case driver.BATTERY_CYCLES:
+
 		s.EventEmitter.Send(shure.Event{
 			Key:    "battery-cycles",
-			Value:  r.Value,
+			Value:  value,
 			Device: dev,
 		})
-	case driver.BATTERY_CHARGE_MINUTES:
+	case _batteryRunTimeType:
+		// Handle special values
+		value := r.Value
+		switch r.Value {
+		case "65535":
+			value = "UNKNOWN"
+		case "65534":
+			value = "CALCULATING"
+		case "":
+			value = "0"
+		}
+
 		s.EventEmitter.Send(shure.Event{
 			Key:    "battery-charge-minutes",
-			Value:  r.Value,
+			Value:  value,
 			Device: dev,
 		})
-	case driver.BATTERY_TYPE:
+	case _batteryTypeType:
+		// Handle special values
+		value := r.Value
+		switch r.Value {
+		case "UNKN":
+			value = "UNKNOWN"
+		}
+
 		s.EventEmitter.Send(shure.Event{
 			Key:    "battery-type",
-			Value:  r.Value,
+			Value:  value,
 			Device: dev,
 		})
-	case driver.INTERFERENCE:
+	case _interferenceType:
 		s.EventEmitter.Send(shure.Event{
 			Key:    "interference",
 			Value:  r.Value,
 			Device: dev,
 		})
-	case driver.POWER:
+	case _powerType:
+		// Handle special values
+		value := "ON" // On in any state other than UNKN
+		if r.Value == "UNKN" {
+			value = "STANDBY"
+		}
 		s.EventEmitter.Send(shure.Event{
 			Key:    "power",
-			Value:  r.Value,
+			Value:  value,
 			Device: dev,
 		})
 	default:
