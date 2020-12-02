@@ -62,6 +62,12 @@ func (s *Service) Monitor(r shure.Receiver) error {
 		for report := range c {
 			s.processReport(report, r)
 		}
+
+		// If we get to this point it is because there was an error and the
+		// reporting channel was closed. Due to the error we will purposefully
+		// wait 5 minutes before retrying reporting as to not slam the receiver
+		// with a ton of rapid requests.
+		time.Sleep(5 * time.Minute)
 	}
 }
 
