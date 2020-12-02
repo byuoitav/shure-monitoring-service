@@ -67,11 +67,12 @@ func (s *Service) Monitor(r shure.Receiver) error {
 		// reporting channel was closed. Due to the error we will purposefully
 		// wait 5 minutes before retrying reporting as to not slam the receiver
 		// with a ton of rapid requests.
-		time.Sleep(5 * time.Minute)
 		log.Printf(
 			"Error while reporting for %s, waiting 5 minutes before retrying.",
 			r.Name,
 		)
+		time.Sleep(5 * time.Minute)
+
 	}
 }
 
