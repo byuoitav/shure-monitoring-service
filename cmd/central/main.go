@@ -36,7 +36,7 @@ func main() {
 		log.Panicf("Failed to get receivers from database: %s", err)
 	}
 
-	e, err := avevent.NewLogEmitter(eventHubAddr)
+	e, err := avevent.NewLogEmitter(eventHubAddr, "central-shure-monitoring")
 	if err != nil {
 		log.Panicf("Failed to start log emitter")
 	}

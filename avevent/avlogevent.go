@@ -12,17 +12,19 @@ import (
 )
 
 type LogEventEmitter struct {
-	m *messenger.Messenger
+	m        *messenger.Messenger
+	systemID string
 }
 
-func NewLogEmitter(hubAddress string) (*LogEventEmitter, error) {
+func NewLogEmitter(hubAddress, systemID string) (*LogEventEmitter, error) {
 	m, err := messenger.BuildMessenger(hubAddress, base.Messenger, 1000)
 	if err != nil {
 		return nil, fmt.Errorf("Error while trying to build messenger: %s", err)
 	}
 
 	return &LogEventEmitter{
-		m: m,
+		m:        m,
+		systemID: systemID,
 	}, nil
 }
 
@@ -33,7 +35,7 @@ func (e *LogEventEmitter) Send(event shure.Event) {
 	// Emit event to av central hub
 	devInfo := events.GenerateBasicDeviceInfo(event.Device)
 	newEvent := events.Event{
-		GeneratingSystem: "central-shure-monitoring",
+		GeneratingSystem: e.systemID,
 		Timestamp:        time.Now(),
 		TargetDevice:     devInfo,
 		AffectedRoom:     devInfo.BasicRoomInfo,
