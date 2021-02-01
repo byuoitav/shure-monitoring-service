@@ -62,6 +62,10 @@ func main() {
 
 	log.Printf("Monitoring initialized on %d receivers", len(recvs))
 
+	// Wait 1 minute before reporting the first time
+	// This allows time to register the receivers as online
+	time.Sleep(1 * time.Minute)
+
 	// report online status for each receiver every 3 minutes
 	for {
 		for i := range recvs {
