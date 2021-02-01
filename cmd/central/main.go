@@ -73,14 +73,14 @@ func main() {
 			// If the receiver has been online for more than 30 seconds then report it as online
 			if recvs[i].Online && time.Since(recvs[i].LastUpdated) > _onlineThreshold {
 				e.Send(shure.Event{
-					Key:    "online",
-					Value:  "Online",
+					Key:    "responsive",
+					Value:  "Ok",
 					Device: recvs[i].Name,
 				})
 			} else {
 				e.Send(shure.Event{
-					Key:    "online",
-					Value:  "Offline",
+					Key:    "responsive",
+					Value:  "No Response",
 					Device: recvs[i].Name,
 				})
 			}
