@@ -23,10 +23,16 @@ type Service struct {
 	EventEmitter shure.EventEmitter
 }
 
-func (s *Service) Monitor(r shure.Receiver) error {
+func (s *Service) Monitor(r *shure.Receiver) error {
 
 	var d *driver.ULXDReceiver
 	var err error
+
+	// Set the receiver as offline until we are communicating
+	r.OnlineMu.Lock()
+	r.Online = false
+	r.LastUpdated = time.Now()
+	r.OnlineMu.Unlock()
 
 	// Keep retrying every 5 minutes if we fail to create a new driver
 	for d == nil {
@@ -55,6 +61,12 @@ func (s *Service) Monitor(r shure.Receiver) error {
 			continue
 		}
 
+		// Set the receiver as online as we have successfully started the reporting
+		r.OnlineMu.Lock()
+		r.Online = true
+		r.LastUpdated = time.Now()
+		r.OnlineMu.Unlock()
+
 		// Debug purposes. Delete later
 		log.Printf("Started Reporting for %s", r.Name)
 
@@ -62,6 +74,12 @@ func (s *Service) Monitor(r shure.Receiver) error {
 		for report := range c {
 			s.processReport(report, r)
 		}
+
+		// The connection has died, mark the receiver as offline
+		r.OnlineMu.Lock()
+		r.Online = false
+		r.LastUpdated = time.Now()
+		r.OnlineMu.Unlock()
 
 		// If we get to this point it is because there was an error and the
 		// reporting channel was closed. Due to the error we will purposefully
@@ -76,7 +94,7 @@ func (s *Service) Monitor(r shure.Receiver) error {
 	}
 }
 
-func (s *Service) processReport(r driver.Report, recv shure.Receiver) {
+func (s *Service) processReport(r driver.Report, recv *shure.Receiver) {
 
 	// Default device to reciever
 	dev := recv.Name

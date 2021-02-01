@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/byuoitav/shure-monitoring-service"
 	"github.com/byuoitav/shure-monitoring-service/avevent"
@@ -13,6 +14,12 @@ import (
 	"github.com/byuoitav/shure-monitoring-service/eventmonitor"
 	"github.com/spf13/pflag"
 )
+
+// _onlineEventInterval specifies how often online events are sent for the receiver
+var _onlineEventInterval = 3 * time.Minute
+
+// _onlineThreshold specifies how long a reciever must be online to be considered online
+var _onlineThreshold = 30 * time.Second
 
 func main() {
 	var (
@@ -67,16 +74,34 @@ func main() {
 	log.Printf("Beginning monitoring...")
 
 	// Initialize monitoring
-	for _, r := range recvs {
-		go func(r shure.Receiver) {
+	for i := range recvs {
+		go func(r *shure.Receiver) {
 			_ = m.Monitor(r)
-		}(r)
+		}(&recvs[i])
 	}
 
 	log.Printf("Monitoring initialized on %d receivers", len(recvs))
 
-	// Hang forever
-	var wg sync.WaitGroup
-	wg.Add(1)
-	wg.Wait()
+	// report online status for each receiver every 3 minutes
+	for {
+		for i := range recvs {
+			recvs[i].OnlineMu.RLock()
+			// If the receiver has been online for more than 30 seconds then report it as online
+			if recvs[i].Online && time.Since(recvs[i].LastUpdated) > _onlineThreshold {
+				e.Send(shure.Event{
+					Key:    "online",
+					Value:  "Online",
+					Device: recvs[i].Name,
+				})
+			} else {
+				e.Send(shure.Event{
+					Key:    "online",
+					Value:  "Offline",
+					Device: recvs[i].Name,
+				})
+			}
+			recvs[i].OnlineMu.RUnlock()
+		}
+		time.Sleep(_onlineEventInterval)
+	}
 }
