@@ -19,6 +19,7 @@ data "aws_ssm_parameter" "eks_cluster_endpoint" {
 
 provider "kubernetes" {
   host = data.aws_ssm_parameter.eks_cluster_endpoint.value
+  config_path = "~/.kube/config"
 }
 
 data "aws_ssm_parameter" "db_address" {
@@ -42,8 +43,8 @@ module "shipyard_prd" {
 
   // required
   name           = "shure-monitoring-prd"
-  image          = "docker.pkg.github.com/byuoitav/shure-monitoring-service/shure-monitoring-service-dev"
-  image_version  = "b0d52c5"
+  image          = "docker.pkg.github.com/byuoitav/shure-monitoring-service/shure-monitoring-service-central-dev"
+  image_version  = "e1d51f9"
   container_port = 80 // doesn't actually exist in container
   repo_url       = "https://github.com/byuoitav/shure-monitoring-service"
 
